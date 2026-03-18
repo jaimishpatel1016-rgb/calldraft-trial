@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import type { TranscriptEntry } from "@/hooks/use-vapi";
+import type { TranscriptEntry, CallStatus } from "@/hooks/use-vapi";
 import { User, Headphones } from "lucide-react";
+import { CallEndedBadge } from "./call-ended-badge";
 
 function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
   const isUser = entry.role === "user";
@@ -40,14 +41,14 @@ function TranscriptMessage({ entry }: { entry: TranscriptEntry }) {
   );
 }
 
-export function TranscriptPanel({ transcript }: { transcript: TranscriptEntry[] }) {
+export function TranscriptPanel({ transcript, status }: { transcript: TranscriptEntry[], status: CallStatus }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [transcript]);
+  }, [transcript, status]);
 
   return (
     <div 
@@ -69,9 +70,13 @@ export function TranscriptPanel({ transcript }: { transcript: TranscriptEntry[] 
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          {transcript.map((entry) => (
-            <TranscriptMessage key={entry.id} entry={entry} />
-          ))}
+          <div className="flex flex-col gap-6">
+            {transcript.map((entry) => (
+              <TranscriptMessage key={entry.id} entry={entry} />
+            ))}
+          </div>
+
+          {status === "ended" && <CallEndedBadge />}
         </div>
       )}
     </div>

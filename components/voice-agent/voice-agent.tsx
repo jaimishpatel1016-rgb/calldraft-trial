@@ -5,7 +5,10 @@ import { CallButton } from "./call-button"
 import { StatusBar } from "./status-bar"
 import { VolumeIndicator } from "./volume-indicator"
 import { TranscriptPanel } from "./transcript-panel"
+import { LatencyIndicator } from "./latency-indicator"
 import { Phone, Mic, MicOff, AlertCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme/theme-toggle"
 
 export function VoiceAgent() {
   const {
@@ -39,18 +42,21 @@ export function VoiceAgent() {
         <div className="flex w-full flex-col gap-8 lg:w-1/3 lg:min-w-[400px]">
           {/* Header */}
           <header className="flex flex-col gap-2">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-emerald-700 text-white shadow-lg">
-                <Phone className="h-6 w-6" />
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-emerald-700 text-white shadow-lg">
+                  <Phone className="h-6 w-6" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                    CallDraft
+                  </h1>
+                  <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    Anderson Heating & Cooling
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  CallDraft
-                </h1>
-                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                  Anderson Heating & Cooling
-                </p>
-              </div>
+              <ThemeToggle />
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
               Talk to Sarah, your AI virtual receptionist. She can answer
@@ -79,32 +85,26 @@ export function VoiceAgent() {
               className={`h-10 transition-all duration-300 ${callStatus === "active" ? "opacity-100" : "pointer-events-none opacity-0"}`}
             >
               {callStatus === "active" && (
-                <button
+                <Button
+                  variant={isMuted ? "destructive" : "secondary"}
                   onClick={toggleMute}
-                  className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition-all hover:bg-accent hover:text-accent-foreground ${
-                    isMuted
-                      ? "border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                      : "border border-border bg-secondary text-secondary-foreground"
-                  }`}
+                  className={`rounded-full px-6 shadow-sm ${isMuted ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/30' : ''}`}
                 >
                   {isMuted ? (
-                    <MicOff className="h-4 w-4" />
+                    <MicOff className="mr-2 h-4 w-4" />
                   ) : (
-                    <Mic className="h-4 w-4" />
+                    <Mic className="mr-2 h-4 w-4" />
                   )}
-                  <span>
-                    {isMuted ? "Microphone Muted" : "Mute Microphone"}
-                  </span>
-                </button>
+                  {isMuted ? "Microphone Muted" : "Mute Microphone"}
+                </Button>
               )}
             </div>
 
-            {/* Status & Latency Info */}
+            {/* Status Info */}
             <div className="mt-4 w-full">
               <StatusBar
                 status={callStatus}
                 duration={callDuration}
-                latency={latency}
               />
             </div>
           </div>
@@ -121,11 +121,14 @@ export function VoiceAgent() {
 
           {/* Transcript Area */}
           <div className="flex min-h-[500px] w-full flex-1 flex-col">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground">
-              Conversation Transcript
-            </h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground">
+                Conversation Transcript
+              </h2>
+              <LatencyIndicator latency={latency} />
+            </div>
             <div className="relative flex-1 overflow-hidden">
-              <TranscriptPanel transcript={transcript} />
+              <TranscriptPanel transcript={transcript} status={callStatus} />
             </div>
           </div>
         </div>

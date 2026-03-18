@@ -97,9 +97,6 @@ export function useVapi(): UseVapiReturn {
         clearInterval(durationIntervalRef.current);
         durationIntervalRef.current = null;
       }
-
-      // Auto-reset to idle after a short delay
-      setTimeout(() => setCallStatus("idle"), 2000);
     });
 
     vapi.on("speech-start", () => {
