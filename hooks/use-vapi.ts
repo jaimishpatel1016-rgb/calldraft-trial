@@ -18,6 +18,7 @@ export interface TranscriptEntry {
 export interface UseVapiReturn {
   callStatus: CallStatus;
   transcript: TranscriptEntry[];
+  latency: number | null;
   isMuted: boolean;
   volumeLevel: number;
   error: string | null;
@@ -50,6 +51,7 @@ Keep responses short and conversational. This is a phone call, not an essay.`;
 export function useVapi(): UseVapiReturn {
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
+  const [latency, setLatency] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +59,7 @@ export function useVapi(): UseVapiReturn {
 
   const vapiRef = useRef<Vapi | null>(null);
   const callStartTimeRef = useRef<number | null>(null);
+  const userSpeechEndTimeRef = useRef<number | null>(null);
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Initialize Vapi instance
@@ -88,6 +91,7 @@ export function useVapi(): UseVapiReturn {
     vapi.on("call-end", () => {
       setCallStatus("ended");
       setVolumeLevel(0);
+      setLatency(null);
 
       if (durationIntervalRef.current) {
         clearInterval(durationIntervalRef.current);
@@ -102,6 +106,24 @@ export function useVapi(): UseVapiReturn {
     });
 
     vapi.on("message", (message: Record<string, unknown>) => {
+      // ── Latency Monitoring ──
+      if (message.type === "conversation-update" && Array.isArray(message.messages)) {
+        const msgs = message.messages as any[];
+        // Look for the last transition from user to bot
+        for (let i = msgs.length - 1; i > 0; i--) {
+          const current = msgs[i];
+          const previous = msgs[i - 1];
+          if (current.role === "bot" && previous.role === "user") {
+            const startTime = current.time;
+            const endTime = previous.endTime;
+            if (startTime && endTime) {
+              setLatency(Math.round(startTime - endTime));
+              break; 
+            }
+          }
+        }
+      }
+
       if (message.type === "transcript") {
         const role = message.role as "user" | "assistant";
         const text = message.transcript as string;
@@ -184,6 +206,7 @@ export function useVapi(): UseVapiReturn {
 
     setCallStatus("connecting");
     setTranscript([]);
+    setLatency(null);
     setError(null);
     setCallDuration(0);
     setIsMuted(false);
@@ -223,6 +246,7 @@ export function useVapi(): UseVapiReturn {
   return {
     callStatus,
     transcript,
+    latency,
     isMuted,
     volumeLevel,
     error,
