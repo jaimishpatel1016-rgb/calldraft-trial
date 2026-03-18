@@ -5,7 +5,6 @@ import { CallButton } from "./call-button"
 import { StatusBar } from "./status-bar"
 import { VolumeIndicator } from "./volume-indicator"
 import { TranscriptPanel } from "./transcript-panel"
-import { LatencyIndicator } from "./latency-indicator"
 import { Phone, Mic, MicOff, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme/theme-toggle"
@@ -14,7 +13,6 @@ export function VoiceAgent() {
   const {
     callStatus,
     transcript,
-    latency,
     isMuted,
     volumeLevel,
     error,
@@ -125,7 +123,6 @@ export function VoiceAgent() {
               <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground">
                 Conversation Transcript
               </h2>
-              <LatencyIndicator latency={latency} />
             </div>
             <div className="relative flex-1 overflow-hidden">
               <TranscriptPanel transcript={transcript} status={callStatus} />

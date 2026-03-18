@@ -18,7 +18,6 @@ export interface TranscriptEntry {
 export interface UseVapiReturn {
   callStatus: CallStatus;
   transcript: TranscriptEntry[];
-  latency: number | null;
   isMuted: boolean;
   volumeLevel: number;
   error: string | null;
@@ -51,7 +50,6 @@ Keep responses short and conversational. This is a phone call, not an essay.`;
 export function useVapi(): UseVapiReturn {
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
-  const [latency, setLatency] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +57,6 @@ export function useVapi(): UseVapiReturn {
 
   const vapiRef = useRef<Vapi | null>(null);
   const callStartTimeRef = useRef<number | null>(null);
-  const userSpeechEndTimeRef = useRef<number | null>(null);
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Initialize Vapi instance
@@ -91,7 +88,6 @@ export function useVapi(): UseVapiReturn {
     vapi.on("call-end", () => {
       setCallStatus("ended");
       setVolumeLevel(0);
-      setLatency(null);
 
       if (durationIntervalRef.current) {
         clearInterval(durationIntervalRef.current);
@@ -99,19 +95,7 @@ export function useVapi(): UseVapiReturn {
       }
     });
 
-    vapi.on("speech-start", () => {
-      // Assistant started speaking — calculate latency
-      if (userSpeechEndTimeRef.current) {
-        const responseTime = Date.now() - userSpeechEndTimeRef.current;
-        setLatency(responseTime);
-        userSpeechEndTimeRef.current = null;
-      }
-    });
 
-    vapi.on("speech-end", () => {
-      // User finished speaking — record timestamp for latency calc
-      userSpeechEndTimeRef.current = Date.now();
-    });
 
     vapi.on("volume-level", (level: number) => {
       setVolumeLevel(level);
@@ -200,7 +184,6 @@ export function useVapi(): UseVapiReturn {
 
     setCallStatus("connecting");
     setTranscript([]);
-    setLatency(null);
     setError(null);
     setCallDuration(0);
     setIsMuted(false);
@@ -240,7 +223,6 @@ export function useVapi(): UseVapiReturn {
   return {
     callStatus,
     transcript,
-    latency,
     isMuted,
     volumeLevel,
     error,

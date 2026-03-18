@@ -10,7 +10,6 @@ I chose **Vapi** because it provides the fastest path to a working voice agent w
 
 - 🎙️ **Real-time voice conversation** — two-way audio with Sarah, the AI receptionist
 - 📝 **Live transcript** — see both sides of the conversation as it happens
-- ⚡ **Latency indicator** — visible response time in milliseconds
 - 🎚️ **Volume visualizer** — real-time audio level feedback
 - 🔇 **Mute control** — toggle your microphone during a call
 - 🌙 **Dark mode** — press `d` to toggle
